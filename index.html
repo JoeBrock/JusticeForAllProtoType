@@ -1,82 +1,290 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang = "en">
 <head>
-    <meta charset="utf-8">
-    <title>Hello! Wow!</title>
-    <script src="js/phaser.js"></script>
-    <script src="js/main.js"></script>
-
-<style>
-body
+    <meta charset="UTF-8">
+    <title>And Justice For All Prototype</title>
+    <script type= "text/javascript" src="js/phaser.min.js"></script>
+<style type="text/css">
 {
     color: #777;
     font-family: "Avenir", Verdana, sans-serif;
 }
 #readme
 {
+    margin: 0;
     margin-top: 10px;
 }
 </style>
-
 </head>
 <body>
-<div id="game"></div>
-<div id="readme">
-<h2>Your game title</h2>
-<ul>
+    
+<div id="game">
+<script type = "text/javascript">
+var game = new Phaser.Game(1000, 1000, Phaser.AUTO,'', {preload: preload, create: create, update: update}); //add update later
 
+//Pictures
+var bar;
+var ch;
+var pol;
+var slep;
+var werk;
+var bck;
+
+//Variables in relation to game mechanics
+var counter = 0; //Our counter for how many std. actions we have left
+var daysLeft = 5; //The amount of days you have left.
+var currInf = 0; //Your current influence.
+var currPolInf = 0; //How much the cops are onto you and your shenanighans.
+var food = 12; //How much food you have (run out of food, and you die)
+    
+//Variables as to the boolean values available.
+var isBar = false; //Checks to see whether or not you've visited the bar
+var isSlep = false; //Checks whether or not you've went to sleep
+var isCity = false; //Checks whether or not you visited city council
+var isPol = false; //Checks whether or not you've visited the police station
+var isWerk = false; //Checks whether or not you've gone to work
+
+//Texts for counters
+var text;
+var textFluence;
+var textPol;
+var textFood;
+var counterText;
+    
+//Texts for notifying player
+var textIntrchange;
+
+//Just to help the player w/ playing the game
+var tutorialText;
+var tutorialText2;
+var tutorialText3;
+var tutorialText4;
+
+function preload() {
+    game.load.image("bar", "assets/Bar.png");
+    game.load.image("ch", "assets/CityHall.png");
+    game.load.image("pol", "assets/Police.png");
+    game.load.image("slep", "assets/Slep.png");
+    game.load.image("werk", "assets/Werk.png");
+}
+
+    
+function create() {
+    var bar = game.add.sprite(100, 100, "bar");
+    var ch = game.add.sprite(75, 700, "ch");
+    var pol = game.add.sprite(700, 200, "pol");
+    var slep = game.add.sprite(500, 500, "slep"); //Something I need desperately now
+    var werk = game.add.sprite(700, 600, "werk");
+    
+    bar.inputEnabled = true;
+    ch.inputEnabled = true;
+    pol.inputEnabled = true;
+    slep.inputEnabled = true;
+    werk.inputEnabled = true;
+    
+    bar.events.onInputDown.add(onBar, this);
+    ch.events.onInputDown.add(onCh, this);
+    pol.events.onInputDown.add(onPol, this);
+    slep.events.onInputDown.add(onSlep, this);
+    werk.events.onInputDown.add(onWerk, this);
+    //bck = game.add.sprite(1000,1000);
+    var style = { font: "italic 25px Arial", fill: "#fff", align: "center" }
+    text=game.add.text(0,0, "You have 4 days to take over the government.", style);
+    textFluence=game.add.text(600, 0, "Current Influence: 0", style);
+    textPol=game.add.text(600, 25, "Police Attention: 0", style);
+    textFood=game.add.text(600, 50, "Food: 12", style);
+    counterText=game.add.text(600, 75, "How many actions you have left: 3", style);
+    tutorialText=game.add.text(600, 800, "*Note if you get police to notice you,\n it's game over*", style);
+    tutorialText2=game.add.text(600, 870, "*Note if you don't get enough food,\n you die*", style);
+    tutorialText3=game.add.text(600, 935, "*Once you have enough support,\n you win!*", style);
+    tutorialText4=game.add.text(50, 400, "",style);
+    //FORMER CODE
+    //"Press 1 to go to bar\n 2 to go to the popo\n 3 to go to werk\n 4 to go to the slep\n 5 to go to city hall."
+    //text.anchor.setTo(-0.10,-0.5);
+    
+}
+function update() {
+    //game.input.onDown.addOnce(updateText,this);
+    if (counter == 3) {
+        daysLeft--;
+        counter = 0;
+        food -= 3;
+    }
+    else if ((daysLeft <= 0) && (ch < 10)) {
+        tutorialText4.setText("The government arrested you!\n Game over!\n");
+        buttonBar = null;
+        buttonCh = null;
+        buttonPol = null;
+        buttonSlep = null;
+        buttonWerk = null;
+    }
+    else if ((daysLeft <= 0) && (ch >= 10)) {
+        tutorialText4.setText("Congratulations!\n You took over the gov't!\n");
+        buttonBar = null;
+        buttonCh = null;
+        buttonPol = null;
+        buttonSlep = null;
+        buttonWerk = null;
+    }
+    else if (food < 0) {
+        tutorialText4.setText("You died of lack of food!\n Game over!\n");
+        buttonBar = null;
+        buttonCh = null;
+        buttonPol = null;
+        buttonSlep = null;
+        buttonWerk = null;
+    }
+    text.setText("You have " + daysLeft + " days to take over the government.");
+}
+
+function onBar() {
+    currInf += 1;
+    currPolInf += 1;
+    if (currPolInf == 5) {
+        ch += 3;
+        currPolInf += 3;
+    }
+    counter++;
+    food--;
+    textFluence.setText("Current Influence: " + currInf);
+    textPol.setText("Police Attention: " + currPolInf);
+    textFood.setText("Food: " + food);
+    counterText.setText("How many actions you have left: " + (3-counter));
+}
+function onCh() {
+    if (currInf == 10) {
+        daysLeft == 0;
+        tutorialText4.setText("Congratulations!\n You took over the gov't!\n");
+        buttonBar = null;
+        buttonCh = null;
+        buttonPol = null;
+        buttonSlep = null;
+        buttonWerk = null;
+    }
+    else if (currPolInf == 10) {
+        daysLeft == 0;
+        tutorialText4.setText("The government arrested you!\n Game over!\n");
+        buttonBar = null;
+        buttonCh = null;
+        buttonPol = null;
+        buttonSlep = null;
+        buttonWerk = null;
+    }
+    else {
+        currInf += game.rnd.integerInRange(-2,2);
+    }
+    counter++;
+    food--;
+    textFluence.setText("Current Influence: " + currInf);
+    textFood.setText("Food: " + food);
+    counterText.setText("How many actions you have left: " + (3-counter));
+}
+function onPol() {
+    if (currPolInf == 10) {
+        daysLeft == 0;
+        tutorialText4.setText("The government arrested you!\n Game over!\n");
+        buttonBar = null;
+        buttonCh = null;
+        buttonPol = null;
+        buttonSlep = null;
+        buttonWerk = null;
+    }
+    else if (currPolInf == 5) {
+        currPolInf += 3;
+        currInf += game.rnd.integerInRange(0,1);
+    }
+    else {
+        currPolInf -= 1;
+        currInf += game.rnd.integerInRange(0,3);
+    }
+    counter++;
+    food--;
+    textFluence.setText("Current Influence: " + currInf);
+    textPol.setText("Police Attention: " + currPolInf);
+    textFood.setText("Food: " + food);
+    counterText.setText("How many actions you have left: " + (3-counter));
+}
+function onSlep() {
+    currPolInf--;
+    currInf--;
+    daysLeft--;
+    counter = 0;
+    counterText.setText("How many actions you have left: " + (3-counter));
+}
+function onWerk() {
+    food += 2;
+    counter++;
+    textFood.setText("Food: " + food);
+    counterText.setText("How many actions you have left: " + (3-counter));
+}
+    
+    
+</script>    
+</div>
+
+<div id="readme">
+<h2>Prototype: "And Justice for All"</h2>
+<ul>
 <li><strong>High Concept:</strong>
-A one-sentence summary of your game.
+And Justice For All is a management-based strategy game in which the player fills the role as a terrorist/political leader attempting to make their way onto the democratic landscape (either through force or not). The win state is for the player to takedown and/or control the government in any way they can via the use of Propaganda, coercion, bribery, etc.
 </li>
 
 <li><strong>Player Experience Goals:</strong>
-What experience do you want players to have when playing your game?
+I want the player to be somewhat strategic with how they allocate their resources. Furthermore, I want them to feel some iota of stress as they're playing the game, and to feel as though they're never quite safe from their inevitable doom.
 </li>
 
 <li><strong>Genre:</strong>
-A single sentence that places the game within a game genre or a hybrid of genres.
+The game’s genre is a hybrid of strategy and narrative-based storytelling.
 </li>
 
 <li><strong>Game play:</strong>
-A paragraph describing the actions the player can perform, the system dynamics, and the core mechanic. Include a concise explanation of the prototype’s inputs and their expected effects (how to play). You can also describe game play that is not in the prototype. You may include mock-up images for parts of the game not in the prototype.
+The way the game works is that the player must craft a strategy based on the positions they take at the start of the game, and then remember the actions they did, turn by turn, for as long as possible. The main focus will be how long the player’s memory can last within the time limit provided. Furthermore, the secondary objective of the game is making sure the player does not lose their
+consumer base over time or that they’re found doing any illegal activities. This is exemplified by some of the game mechanics; ranging from breaking off ties with former partnerships to making immoral decisions on the account of allowing the player to continue onwards. It’s a game that forces the player to analyze the computer’s next move, but also to educate the player on the effects of terrorism, how it happens, and why it occurs.
 </li>
 
 <li><strong>Prototype goal:</strong>
-What game mechanic is this prototype evaluating?
+My prototype goal for this project was to get a skeleton ready and good to go, so that way as I gathered up my group members I could continue to test the game. It wouldn't have the dialogue choices just yet, but I wanted to focus on how I would go about trying to get the core strategy of the game working, and then implement the logical consistentcy questions in later.
 </li>
 
 <li><strong>Features:</strong>
-What are the unique aspects of your game that set it apart?
+This game will have a branching dialogue option, but for now the main game is focused in the aspect of influencing society into going along with your group more through strategy and the careful planning of resources.
 </li>
 
 <li><strong>Setting/Premise:</strong>
-A paragraph about the world your game is set in and who the characters are. What makes the game world and its occupants unique and interesting? Do the tokens represent something? If the game has a backstory, put it here. If the game is abstract, then say so.
+The setting is modern day America, but timewise it’s four years before the next election. Many Americans are feeling unsure and apathetic about the new president, though there are a lot of arguments over the constitutionality of the president’s methods. The political atmosphere is indifferent, but a lot of communities are fighting to keep what little hold on the political landscape they have. What makes this world unique is that the majority of the game is based around the idea of an otherwise boring environment. In many games, the setting’s flashiness sometimes takes precedence, and as a result the player could accidentally skip over some of the minute details as to what makes that environment so enticing. However, the focus on modernity in this game is made purposefully so as to emphasize how quickly radical organizations can grow.
 </li>
 
 <li><strong>Story:</strong>
-If the game has a story, summarize it in a paragraph. How will the dramatic tension interact with the gameplay tension?
+The player is put into the role of a young, up-and-coming college student. After hearing that the majority of political scientists tend to do poorly after graduating, the player’s character decides that the best course of action is to join a political party as soon as possible to avoid unemployment. From there, the player is asked a series of questions based on their political beliefs. However, after the questionnaire, the story starts with player character dropping out of that political party due to dissatisfaction, and then rounding up a small group of radical individuals in an attempt to change the political landscape.
+
 </li>
 
 <li><strong>Target Audience:</strong>
-A single sentence that describes the demographic you're trying to reach.
+I’m trying to reach the 32-45 year old, male demographic. Though this isn't exclusive to women or transgender people, according to the ESA 37 is the average age of the most frequent game purchaser. Furthermore, according to the Software Usability Research Lab, males are more likely than females to play strategy and roleplaying games in general.
 </li>
 
 <li><strong>Play time:</strong>
-How long does your game take to play?
+The game currently should only take about five-ten minutes to complete, but may be longer as time goes around.
 </li>
 
 <li><strong>Strategies:</strong>
-What player strategies do you expect will be effective at playing this game?
+Early strategy is important, and therefore it will be important for the player to get in the habit of checking some of the values that could be incorporated into the game.
 </li>
 
 <li><strong>Prototype Assets:</strong>
-Did you make your prototype assets from scratch? Did you borrow them? Cite your sources here.
+The majority of the assets that I made were made from scratch with the small amount of time I had, but I did use some of the code for reference since the api is a nightmare.
+    
+References: http://phaser.io/tutorials/making-your-first-phaser-game/part3; http://www.html5gamedevs.com/topic/4640-integer-random-question/; http://phaser.io/docs/2.4.4/Phaser.Text.html; http://phaser.io/examples/v2/input/mouse-buttons; http://phaser.io/examples/v2/text/text-events;
+http://phaser.io/docs/2.3.0/Phaser.Component.LoadTexture.html;
+http://www.html5gamedevs.com/topic/4640-integer-random-question/;
+http://examples.phaser.io/_site/view_full.html?d=text&f=update+text.js&t=update%20text;
+http://phaser.io/examples/v2/basics/02-click-on-an-image
+http://phaser.io/examples/v2/buttons/action-on-click
 </li>
 
 <li><strong>Prototype Closest Other Game:</strong>
-Which other game most closely resembles your game? If you are borrowing from a Phaser Example, you must say so here.
+Democracy would have to be the closest game that this comes to mind on, but other than that nothing quite rings a bell.
 </li>
-
 </ul>
 </div>
 </body>
